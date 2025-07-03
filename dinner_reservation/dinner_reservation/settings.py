@@ -31,13 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'django_filters',
     'drf_yasg',
@@ -46,15 +48,22 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # ✅ JWT authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # ✅ Require authentication by default
     ],
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ]
+        'django_filters.rest_framework.DjangoFilterBackend',  # ✅ Enable filtering
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Optional: Pagination
+    'PAGE_SIZE': 10,  # Optional: Default page size
 }
 
 
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,10 +71,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'reservations.middleware.LogHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'dinner_reservation.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -151,11 +160,15 @@ SWAGGER_SETTINGS = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # or longer if needed
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',  # ✅ Define the algorithm explicitly
+    'SIGNING_KEY': 'django-insecure-!-jbo_%xpgwf&r(r0z&)zxksjc&4%&p@f!^p9i($xe_7kb0xgk',  # ✅ Use your Django SECRET_KEY for signing
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
 
 STATIC_URL = '/static/'
 
@@ -164,6 +177,15 @@ STATIC_URL = '/static/'
 #]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:5173",  # ✅ Allow frontend
+    "http://localhost:5174",  # New Port 
+    "http://127.0.0.1:8000",  # ✅ Allow backend
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'dinkman1000@gmail.com'
+EMAIL_HOST_PASSWORD = 'kxse smki jvwg eavx'  # generate via Gmail App Passwords
 
